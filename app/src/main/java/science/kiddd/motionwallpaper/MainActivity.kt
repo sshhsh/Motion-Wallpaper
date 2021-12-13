@@ -21,22 +21,6 @@ class MainActivity : AppCompatActivity() {
 
         val button = findViewById<Button>(R.id.button)
         button.setOnClickListener {
-//            val file = File(filesDir, "a.mp4")
-//            copyStreamToFile(resources.openRawResource(R.raw.output), file)
-//            val dir = getDir(dirName, MODE_PRIVATE)
-//            for (f in dir.listFiles() ?: arrayOf()) {
-//                f.delete()
-//            }
-//            FFmpegKit.executeAsync("-i ${file.absolutePath} -vf scale=w=540:h=1080:force_original_aspect_ratio=increase,crop=540:1080 -qscale:v 2 ${dir.absolutePath}/out-%04d.jpg") {
-//                val intent = Intent(
-//                    WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER
-//                )
-//                intent.putExtra(
-//                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-//                    ComponentName(this, WallPaper::class.java)
-//                )
-//                startActivity(intent)
-//            }
             selectVideo()
         }
     }

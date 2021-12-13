@@ -27,7 +27,7 @@ class VideoPicture(private val context: Context) {
         val indexF = (bias + 1) * length / 2
         var index = indexF.toInt()
         index = if (index >= length) length - 1 else if (index < 0) 0 else index
-//        index = index/5*5
+
         Log.d("aaa", index.toString())
         if (cache.containsKey(index)) {
             return cache[index]
