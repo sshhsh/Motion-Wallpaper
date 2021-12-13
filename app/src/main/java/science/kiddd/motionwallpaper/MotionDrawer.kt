@@ -35,12 +35,12 @@ class MotionDrawer(private val context: Context, private val holder: SurfaceHold
         updateAngle(event.values[0], event.values[1])
         if (job == null || job?.isCompleted == true) {
             job = scope.launch {
-                val canvas = holder.lockHardwareCanvas()
                 val bitmap = picture.getPicture(-yAngle/yRange)
                 bitmap?.let {
+                    val canvas = holder.lockHardwareCanvas()
                     drawBitMapOnCanvas(it, canvas, -xAngle/xRange, edgeWidth)
+                    holder.unlockCanvasAndPost(canvas)
                 }
-                holder.unlockCanvasAndPost(canvas)
             }
         }
     }

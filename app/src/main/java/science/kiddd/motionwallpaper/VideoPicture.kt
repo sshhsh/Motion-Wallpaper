@@ -14,6 +14,7 @@ class VideoPicture(private val context: Context) {
     private val cache = mutableMapOf<Int, Bitmap?>()
     private val pictures: MutableList<File>
     private val time: Date
+    private var lastIndex = -1
 
     init {
         val dir = context.getDir(dirName, Context.MODE_PRIVATE)
@@ -27,7 +28,10 @@ class VideoPicture(private val context: Context) {
         val indexF = (bias + 1) * length / 2
         var index = indexF.toInt()
         index = if (index >= length) length - 1 else if (index < 0) 0 else index
-
+        if ( lastIndex == index ) {
+            return null
+        }
+        lastIndex = index
         Log.d("aaa", index.toString())
         if (cache.containsKey(index)) {
             return cache[index]
