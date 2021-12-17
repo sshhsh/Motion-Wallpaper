@@ -7,7 +7,7 @@ import android.util.Log
 import java.io.File
 import java.util.*
 
-const val dirName = "pics"
+const val cachePictureDirName = "pics"
 
 class VideoPicture(private val context: Context) {
     private val length: Int
@@ -17,7 +17,7 @@ class VideoPicture(private val context: Context) {
     private var lastIndex = -1
 
     init {
-        val dir = context.getDir(dirName, Context.MODE_PRIVATE)
+        val dir = context.getDir(cachePictureDirName, Context.MODE_PRIVATE)
         pictures = dir.listFiles()?.toMutableList() ?: mutableListOf()
         pictures.sortWith { o1, o2 -> o1.name.compareTo(o2.name) }
         length = pictures.size
@@ -41,7 +41,7 @@ class VideoPicture(private val context: Context) {
     }
 
     fun isOutDated(): Boolean {
-        val dir = context.getDir(dirName, Context.MODE_PRIVATE)
+        val dir = context.getDir(cachePictureDirName, Context.MODE_PRIVATE)
         val files = dir.listFiles()
         if (files == null || files.isEmpty()) {
             return true
