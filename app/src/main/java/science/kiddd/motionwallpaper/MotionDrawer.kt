@@ -15,8 +15,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class MotionDrawer(private val context: Context, private val holder: SurfaceHolder) : SensorEventListener {
-    private var sensorManager: SensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+class MotionDrawer(private val context: Context, private val holder: SurfaceHolder) :
+    SensorEventListener {
+    private var sensorManager: SensorManager =
+        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
     private var picture: VideoPicture = VideoPicture(context)
     private var renderJob = Job()
@@ -31,16 +33,28 @@ class MotionDrawer(private val context: Context, private val holder: SurfaceHold
     private val xSensitivity = 1f
     private val ySensitivity = 1f
 
+    private var lastBitmap: Bitmap? = null
+    private var lastBias = Float.MIN_VALUE
+    private val minBias = 1f / 10 * edgeWidth
+
     override fun onSensorChanged(event: SensorEvent) {
         updateAngle(event.values[0], event.values[1])
         if (job == null || job?.isCompleted == true) {
             job = scope.launch {
-                val bitmap = picture.getPicture(-yAngle/yRange)
-                bitmap?.let {
-                    val canvas = holder.lockHardwareCanvas()
-                    drawBitMapOnCanvas(it, canvas, -xAngle/xRange, edgeWidth)
-                    holder.unlockCanvasAndPost(canvas)
+                val bitmap = picture.getPicture(-yAngle / yRange)
+                val newBitmap = bitmap ?: lastBitmap
+                val newBias = (-xAngle / xRange).let {
+                    if (kotlin.math.abs(it - lastBias) > minBias) it else lastBias
                 }
+                if (kotlin.math.abs(newBias - lastBias) > minBias || bitmap !== null) {
+                    newBitmap?.let {
+                        val canvas = holder.lockHardwareCanvas()
+                        drawBitMapOnCanvas(it, canvas, newBias, edgeWidth)
+                        holder.unlockCanvasAndPost(canvas)
+                    }
+                }
+                lastBias = newBias
+                lastBitmap = newBitmap
             }
         }
     }
@@ -85,10 +99,10 @@ fun drawBitMapOnCanvas(bitmap: Bitmap, canvas: Canvas, bias: Float, edge: Float 
     val biasH = (bitmap.height * edge / 2 * (bias + 1)).toInt()
     val bitmapRect = if (w * rect.height() > h * rect.width()) {
         val newWidth = rect.width() * h / rect.height()
-        Rect((w - newWidth)/2, biasH, (w + newWidth)/2, h + biasH)
+        Rect((w - newWidth) / 2, biasH, (w + newWidth) / 2, h + biasH)
     } else {
         val newHeight = rect.height() * w / rect.width()
-        Rect(0, (h - newHeight)/2 + biasH, w, (h + newHeight)/2 + biasH)
+        Rect(0, (h - newHeight) / 2 + biasH, w, (h + newHeight) / 2 + biasH)
     }
     canvas.drawBitmap(bitmap, bitmapRect, rect, null)
 }
