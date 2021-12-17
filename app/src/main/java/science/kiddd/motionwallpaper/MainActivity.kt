@@ -11,10 +11,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -30,6 +33,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.arthenica.ffmpegkit.FFmpegKit
 import kotlinx.coroutines.launch
 import science.kiddd.motionwallpaper.ui.theme.MotionWallpaperTheme
@@ -78,12 +82,11 @@ const val videoDirName = "video"
 
 @Composable
 fun VideoList(files: SnapshotStateList<File>) {
-    LazyColumn(
-        contentPadding = PaddingValues(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+    LazyVerticalGrid(
+        cells = GridCells.Adaptive(minSize = 128.dp)
     ) {
-        items(files, key = { file -> file.name }) { file ->
-            VideoCard(file, files)
+        items(files.size) { i ->
+            VideoCard(files[i], files)
         }
     }
 }
@@ -103,58 +106,34 @@ fun VideoCard(file: File, files: SnapshotStateList<File>) {
         it
     }
     val bitMap = state.value
-    Card(
-        elevation = 4.dp,
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.height(150.dp)
-            .fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            bitMap?.let {
-                val context = LocalContext.current
-                Image(
-                    bitmap = it.asImageBitmap(),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.aspectRatio(1f, true)
-                        .clickable {
-                            val dir = context.getDir(
-                                cachePictureDirName,
-                                AppCompatActivity.MODE_PRIVATE
-                            )
-                            for (f in dir.listFiles() ?: arrayOf()) {
-                                f.delete()
-                            }
-                            FFmpegKit.executeAsync("-i ${file.absolutePath} -vf scale=w=540:h=1080:force_original_aspect_ratio=increase,crop=540:1080 -qscale:v 2 ${dir.absolutePath}/out-%04d.jpg") {
-                                val intent = Intent(
-                                    WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER
-                                )
-                                intent.putExtra(
-                                    WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                                    ComponentName(context, WallPaper::class.java)
-                                )
-                                context.startActivity(intent)
-                            }
-                        },
-                )
-            }
-            IconButton(
-                content = {
-                    Icon(Icons.Rounded.Delete, contentDescription = "Delete video")
+    bitMap?.let {
+        val context = LocalContext.current
+        Image(
+            bitmap = it.asImageBitmap(),
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.aspectRatio(1f, true)
+                .clickable {
+                    val dir = context.getDir(
+                        cachePictureDirName,
+                        AppCompatActivity.MODE_PRIVATE
+                    )
+                    for (f in dir.listFiles() ?: arrayOf()) {
+                        f.delete()
+                    }
+                    FFmpegKit.executeAsync("-i ${file.absolutePath} -vf scale=w=540:h=1080:force_original_aspect_ratio=increase,crop=540:1080 -qscale:v 2 ${dir.absolutePath}/out-%04d.jpg") {
+                        val intent = Intent(
+                            WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER
+                        )
+                        intent.putExtra(
+                            WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+                            ComponentName(context, WallPaper::class.java)
+                        )
+                        context.startActivity(intent)
+                    }
                 },
-                onClick = {
-                    files.remove(file)
-                    file.delete()
-                },
-                modifier = Modifier.align(Alignment.CenterVertically)
-
-            )
-        }
+        )
     }
-
 }
 
 @Composable
