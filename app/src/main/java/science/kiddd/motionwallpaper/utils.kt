@@ -1,12 +1,13 @@
 package science.kiddd.motionwallpaper
 
-import android.R.attr
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import android.R.attr.bitmap
 
 
 fun copyStreamToFile(inputStream: InputStream, outputFile: File) {
@@ -24,14 +25,23 @@ fun copyStreamToFile(inputStream: InputStream, outputFile: File) {
     }
 }
 
-fun getCover(file: File?): Bitmap? {
+const val coverCacheDirName = "cover_cache"
+fun getCover(context: Context, file: File?): Bitmap? {
+    val dir = context.getDir(coverCacheDirName, AppCompatActivity.MODE_PRIVATE)
     if (file == null) {
         return null
+    }
+    val coverFile = File(dir, file.name)
+    if (coverFile.exists()) {
+        return BitmapFactory.decodeFile(coverFile.absolutePath)
     }
     val metadata = MediaMetadataRetriever()
     metadata.setDataSource(file.absolutePath)
     val res = metadata.getFrameAtTime(0)
     metadata.release()
+    res?.let {
+        saveBitmap(it, coverFile)
+    }
     return res
 }
 

@@ -8,19 +8,20 @@ import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +43,10 @@ fun SetPage(file: File?, files: SnapshotStateList<File>, navController: NavContr
     ConstraintLayout(Modifier.fillMaxSize()) {
         val (toolbar) = createRefs()
         val scope = rememberCoroutineScope()
-        val state = rememberSaveable {
+        val state = remember {
             val it = mutableStateOf<Bitmap?>(null)
             scope.launch {
-                it.value = getCover(file)
+                it.value = getCover(context, file)
             }
             it
         }

@@ -2,7 +2,6 @@ package science.kiddd.motionwallpaper
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,7 +18,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -34,8 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import science.kiddd.motionwallpaper.ui.theme.MotionWallpaperTheme
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -99,11 +95,12 @@ const val videoDirName = "video"
 
 @Composable
 fun VideoCard(file: File, navController: NavController) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val state = remember {
         val it = mutableStateOf<Bitmap?>(null)
         scope.launch {
-            it.value = getCover(file)
+            it.value = getCover(context, file)
         }
         it
     }
