@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +70,7 @@ fun SetPage(file: File?, files: SnapshotStateList<File>, navController: NavContr
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
+            ModeButton()
             IconButton(onClick = {
                 files.remove(file)
                 file?.delete()
@@ -84,6 +85,30 @@ fun SetPage(file: File?, files: SnapshotStateList<File>, navController: NavContr
             }
         }
 
+    }
+}
+
+@Composable
+fun ModeButton() {
+    val expanded = remember { mutableStateOf(false) }
+    val selectedIndex = remember { mutableStateOf(0) }
+    IconButton(onClick = {
+        expanded.value = !expanded.value
+    }) {
+        Icon(Icons.Rounded.Menu, contentDescription = "Finish")
+        DropdownMenu(
+            expanded = expanded.value,
+            onDismissRequest = { expanded.value = false }
+        ) {
+            listOf("Motion", "Scroll").forEachIndexed { index, mode ->
+                DropdownMenuItem(onClick = {
+                    selectedIndex.value = index
+                    expanded.value = false
+                }) {
+                    Text(text = mode)
+                }
+            }
+        }
     }
 }
 
