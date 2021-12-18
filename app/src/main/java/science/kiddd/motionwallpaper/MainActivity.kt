@@ -19,6 +19,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -64,7 +65,7 @@ fun App() {
                 val path = backStackEntry.arguments?.getString("path")
                 val dir = context.getDir(videoDirName, AppCompatActivity.MODE_PRIVATE)
                 val file = path?.let { File(dir, path) }
-                SetPage(file)
+                SetPage(file, videolist, navController)
             }
         }
     }
@@ -102,11 +103,7 @@ fun VideoCard(file: File, navController: NavController) {
     val state = remember {
         val it = mutableStateOf<Bitmap?>(null)
         scope.launch {
-            val metadata = MediaMetadataRetriever()
-            metadata.setDataSource(file.absolutePath)
-            val res = metadata.getFrameAtTime(0)
-            metadata.release()
-            it.value = res
+            it.value = getCover(file)
         }
         it
     }
@@ -156,19 +153,4 @@ fun ChooseVideoButton(videolist: SnapshotStateList<File>) {
 @Composable
 fun DefaultPreview() {
     App()
-}
-
-fun copyStreamToFile(inputStream: InputStream, outputFile: File) {
-    inputStream.use { input ->
-        val outputStream = FileOutputStream(outputFile)
-        outputStream.use { output ->
-            val buffer = ByteArray(4 * 1024) // buffer size
-            while (true) {
-                val byteCount = input.read(buffer)
-                if (byteCount < 0) break
-                output.write(buffer, 0, byteCount)
-            }
-            output.flush()
-        }
-    }
 }
