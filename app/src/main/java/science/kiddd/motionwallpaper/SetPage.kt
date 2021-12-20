@@ -35,6 +35,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.arthenica.ffmpegkit.FFmpegKit
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 @Composable
@@ -59,7 +60,8 @@ fun SetPage(file: File?, files: SnapshotStateList<File>, navController: NavContr
             )
         }
         Row(
-            modifier = Modifier.background(Color(0x88888888), RoundedCornerShape(20.dp))
+            modifier = Modifier
+                .background(Color(0x88888888), RoundedCornerShape(20.dp))
                 .height(40.dp)
                 .constrainAs(toolbar) {
                     bottom.linkTo(parent.bottom, 20.dp)
@@ -91,7 +93,7 @@ fun SetPage(file: File?, files: SnapshotStateList<File>, navController: NavContr
 @Composable
 fun ModeButton() {
     val expanded = remember { mutableStateOf(false) }
-    val selectedIndex = remember { mutableStateOf(0) }
+    val selectedMode = remember { mutableStateOf(MODE.MOTION) }
     IconButton(onClick = {
         expanded.value = !expanded.value
     }) {
@@ -100,12 +102,16 @@ fun ModeButton() {
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }
         ) {
-            listOf("Motion", "Scroll").forEachIndexed { index, mode ->
+            val context = LocalContext.current
+            MODE.values().forEachIndexed { _, mode ->
                 DropdownMenuItem(onClick = {
-                    selectedIndex.value = index
+                    selectedMode.value = mode
                     expanded.value = false
+                    runBlocking {
+                        setMode(context, mode)
+                    }
                 }) {
-                    Text(text = mode)
+                    Text(text = mode.name)
                 }
             }
         }

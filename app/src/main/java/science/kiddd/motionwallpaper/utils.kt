@@ -3,12 +3,13 @@ package science.kiddd.motionwallpaper
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Rect
 import android.media.MediaMetadataRetriever
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-
 
 fun copyStreamToFile(inputStream: InputStream, outputFile: File) {
     inputStream.use { input ->
@@ -51,4 +52,20 @@ fun saveBitmap(bitmap: Bitmap, file: File) {
         out.flush()
         out.close()
     }
+}
+
+fun drawBitMapOnCanvas(bitmap: Bitmap, canvas: Canvas, bias: Float, edge: Float = 0.1f) {
+    val rect = Rect()
+    canvas.getClipBounds(rect)
+    val w = bitmap.width
+    val h = (bitmap.height * (1 - edge)).toInt()
+    val biasH = (bitmap.height * edge / 2 * (bias + 1)).toInt()
+    val bitmapRect = if (w * rect.height() > h * rect.width()) {
+        val newWidth = rect.width() * h / rect.height()
+        Rect((w - newWidth) / 2, biasH, (w + newWidth) / 2, h + biasH)
+    } else {
+        val newHeight = rect.height() * w / rect.width()
+        Rect(0, (h - newHeight) / 2 + biasH, w, (h + newHeight) / 2 + biasH)
+    }
+    canvas.drawBitmap(bitmap, bitmapRect, rect, null)
 }

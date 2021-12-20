@@ -2,8 +2,6 @@ package science.kiddd.motionwallpaper
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Rect
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -16,7 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MotionDrawer(private val context: Context, private val holder: SurfaceHolder) :
-    SensorEventListener {
+    SensorEventListener, MyDrawer {
     private var sensorManager: SensorManager =
         context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private var sensor: Sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
@@ -69,7 +67,7 @@ class MotionDrawer(private val context: Context, private val holder: SurfaceHold
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
-    fun start(clear: Boolean) {
+    override fun start(clear: Boolean) {
         if (clear) {
             yAngle = 0f
             xAngle = 0f
@@ -81,28 +79,15 @@ class MotionDrawer(private val context: Context, private val holder: SurfaceHold
         sensorManager.registerListener(this, sensor, 1000000 / frameRate)
     }
 
-    fun pause() {
+    override fun pause() {
         sensorManager.unregisterListener(this)
     }
 
-    fun destroy() {
+    override fun destroy() {
         sensorManager.unregisterListener(this)
         renderJob.cancel()
     }
-}
 
-fun drawBitMapOnCanvas(bitmap: Bitmap, canvas: Canvas, bias: Float, edge: Float = 0.1f) {
-    val rect = Rect()
-    canvas.getClipBounds(rect)
-    val w = bitmap.width
-    val h = (bitmap.height * (1 - edge)).toInt()
-    val biasH = (bitmap.height * edge / 2 * (bias + 1)).toInt()
-    val bitmapRect = if (w * rect.height() > h * rect.width()) {
-        val newWidth = rect.width() * h / rect.height()
-        Rect((w - newWidth) / 2, biasH, (w + newWidth) / 2, h + biasH)
-    } else {
-        val newHeight = rect.height() * w / rect.width()
-        Rect(0, (h - newHeight) / 2 + biasH, w, (h + newHeight) / 2 + biasH)
+    override fun offset(offset: Float) {
     }
-    canvas.drawBitmap(bitmap, bitmapRect, rect, null)
 }
